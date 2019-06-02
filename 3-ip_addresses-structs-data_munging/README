@@ -70,3 +70,84 @@ htons() - host to network short
 htonl() - host to network long
 ntohs() - network to host short
 ntohl() - network to host long
+
+3.3 structs
+
+socket descriptor type is int.
+
+socket address structure:
+
+struct addrinfo {
+	int		 ai_flags;	// AI_PASSIVE, AI_CANONNAME, etc.
+	int		 ai_family;	// AF_INET, AF_INET6, AF_UNSPEC
+	int		 ai_socktype;	// SOCK_STREAM, SOCK_DGRAM
+	int		 ai_protocol;	// use 0 for "any"
+	size_t		 ai_addrlen;	// size of ai_addr in bytes
+	struct sockaddr *ai_addr;	// struct sockaddr_in or _in6
+	char		*ai_canonname;	// full canonical hostname
+	struct addrinfo *ai_next;	// linked list, next node
+};
+
+rarely set by hand, rather by using getaddrinfo().
+
+AF_INET - ipv4, AF_INET6 - ipv6, AF_UNSPEC - use whatever(ip ver. agnostic)
+ai_next - points to the next element
+
+structure sockaddr:
+
+struct sockaddr {
+	unsigned short sa_family;	// address family, AF_xxx
+	char	       sa_data[14];	// 14 bytes of protocol address
+};
+
+sa_family - can be AF_INET(ipv4), AF_INET6(ipv6) as an example
+sa_data - destination address and port number for the socket.
+
+structure sockaddr_in("in" for internet) to be used with ipv4:
+
+struct sockaddr_in {
+	short int	   sin_family;	// Address family, AF_INET
+	unsigned short int sin_port;	// Port number, must be Network byte order
+	struct in_addr	   sin_addr;	// Internet address
+	unsigned char	   sin_zero[8];	// Same size as struct sockaddr
+};
+
+can be cast to a pointer to a struct sockaddr and vice-versa.
+sin_zero - padding to the length of the struct sockaddr,
+should be zeroed with memset()
+
+structure in_addr:
+
+struct in_addr {
+	uint32_t s_addr; // that's a 32-bit int (4-bytes), network byte order
+};
+
+contains 4-byte  IP address in network byte order
+
+structure sockaddr_in6 to be used with ipv6:
+
+struct sockaddr_in6 {
+	u_int16_t 	sin6_family;	// address family, AF_INET6
+	u_int16_t	sin6_port;	// port number, Network byte order
+	u_int32_t 	sin6_flowinfo;	// ipv6 flow information
+	struct in6_addr sin6_addr;	// ipv6 address
+	u_int32_t	sin6_scope_id;	// scope ID
+};
+
+structure in6_addr:
+
+struct in6_addr {
+	unsigned char s6_addr[16]; // ipv6 address
+};
+
+structure designed to hold both ipv4 and ipv6 structures:
+
+struct sockaddr_storage {
+	sa_family_t ss_family;			// address family
+	char	    __ss_pad1[_SS_PAD1SIZE];	// padding
+	int64_t	    __ss_align;
+	char	    __ss_pad2[_SS_PAD2SIZE];
+};
+
+ss_family can be used to judge if it's AF_INET or AF_INET6, and then
+you can cast it to a struct sockaddr_in or struct sockaddr_in6.
