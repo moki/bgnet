@@ -1,0 +1,84 @@
+What is a socket?
+
+Any sort of i/o in unix like, is done by reading or writing to file descriptor.
+fd is simply an integer associated with an open file. That file can be anything
+a FIFO, pipe, terminal, on-the-disk file, ... communication is done through
+a file descriptor between programs.
+
+Call to the socket() syscall - returns socket descriptor.
+send(), recv() - communicate using socket descriptor.
+
+
+Types of sockets:
+
+DARPA Internet addresses(Internet Sockets) - subject of the book.
+path names on a local node(Unix Sockets)
+
+
+Types of Internet Sockets:
+
+raw sockets
+stream sockets("SOCK_STREAM")
+datagram sockets("SOCK_DGRAM"), also referred to as connectionless sockets.
+
+Stream sockets - reliable two-way connected communication streams.
+Outputting two items into the socket in the order "1, 2", yield arrival
+in the order "1, 2" on the other end, error free, implements TCP protocol.
+
+Datagram sockets - unreliable, connectionless. One dont have to maintain
+an open connection. Build packet, set ip header with destination information,
+and send it. Usable when TCP stack is unavailable or when a few dropped packets
+not crucial, usages: tftp, dhcp, multiplayer games, streaming.
+
+tftp and dhcp requires reliability but it uses datagram sockets(UDP)
+to implement their own protocol on top of it, which provides consistency
+through some kind of acknowledgement ACK verifying that receiver got the
+packet sender sent.
+
+Multiplayer games, media streaming deals with lost packets by ignoring
+dropping frame rate respectively.
+
+Unreliable datagram sockets(UDP) advantage is speed.
+
+
+Low level details, network theory
+
+Datagram sockets example:
+sender forms packet by wrapping data in a header at the top level tftp
+(as an example), then it is wrapped again by the next protocol udp,
+then again by the ip, then again on the hardware physical layer ethernet
+as an example.
+receivers hardware strips ethernet header, kernel the ip and udp headers,
+tftp strips tftp header, and it finally receives the data.
+
+OSI Layers:
+
+Application:
+service provided to the end user.
+
+Presentation:
+data encryption and decryption. MIME, SSL, XDR.
+
+Session:
+session setup, coordinator, terminator between the applications. RPC.
+
+Transport:
+end to end communication between processes. TCP, UDP.
+
+Network:
+delivering packets to specific network address, across multiple
+datalink layer networks.(routers) IP
+
+Data Link:
+node to node transfer of frames on the same physical line or wireless link,
+MAC, LLC.(switches)
+
+Physical:
+hardware(coaxile, optical fibers) moves 0's & 1's between two systems
+
+UNIX world model:
+
+Application Layer - telnet, ftp, ...
+Host-to-Host Transport Layer - tcp, udp
+Internet Layer - ip, routing
+Network Access Layer - thernet, wifi

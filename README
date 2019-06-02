@@ -1,2 +1,8 @@
 Beej's Guide to Network Programming Using Internet Sockets
 code and notes
+
+Contents:
+
+2. What is a socket? | 2-socket/
+	Types of sockets
+	Low level details, network theory
