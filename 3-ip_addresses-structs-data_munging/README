@@ -51,3 +51,22 @@ ipv6
 16-bit number, that acts like address of the service.
 port numbers < 1024 are considered special and requires special OS privileges.
 listed in Big IANA Port List, on a unix: /etc/services
+
+
+3.2 Byte Order
+
+There are two orders in the computer architecture big-endian and little-endian
+little-endian:  intel 8086		hex-value: 4fb3
+big-endian:	network byte order	hex-value: b34f
+
+Host byte order mostly little-endian, Network byte order always big-endian.
+Convert values to network byte order before sending them on the wire, and
+convert them from network byte order to host byte order when they come off
+the wire.
+
+<arpa/inet.h>
+
+htons() - host to network short
+htonl() - host to network long
+ntohs() - network to host short
+ntohl() - network to host long
