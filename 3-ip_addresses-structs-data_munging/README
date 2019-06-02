@@ -1,0 +1,53 @@
+3 IP Addresses, structs, and Data Munging
+
+3.1 IP Addresses v4, v6
+
+The internet protocol version 4 - IPv4
+
+addresses made up of four bytes(4 octets) separated by dots: 192.0.2.111
+allows up to 2^32 unique addresses ~4bil
+
+The internet protocol version 6 - IPv6
+
+addresses made up of eight 2 bytes(16-bit) chunks in hex separated by colons:
+2001:0db8:c9d2:aee5:73e3:934a:a5ae:9551
+sequential 0's can be compressed between two colons, one can leave off leading
+zeroes for each byte pair as an example:
+
+explicit: 2001:0db8:c9d2:0012:0000:0000:0000:0051
+implicit: 2001:db8:c9d2:12::51
+
+explicit: 2001:0db8:ab00:0000:0000:0000:0000:0000
+implicit: 2001:db8:ab00::
+
+explicit: 0000:0000:0000:0000:0000:0000:0000:0001
+implicit: ::1
+
+loopback address: ::1 known as localhost and represented in ipv4 as 127.0.0.1
+
+ipv4 compatible mode for ipv6
+::ffff:192.0.2.33
+
+3.1.1 Subnets
+
+Network portion of the ip address is called the netmask, which you bitwise and
+with the ip address to get the network number out of it.
+
+mask: 		255.255.255.0
+ip address: 	192.0.2.12
+network:	192.0.2.0
+host:		12
+
+representation convention:
+<ip_address>/<number_of_network_bits_in_decimal>
+ipv4
+192.0.2.12/30
+ipv6
+2001:db8::/32
+2001:db8:5413:4028::9db9/64
+
+3.1.2 Port Numbers
+
+16-bit number, that acts like address of the service.
+port numbers < 1024 are considered special and requires special OS privileges.
+listed in Big IANA Port List, on a unix: /etc/services
