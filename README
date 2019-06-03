@@ -6,3 +6,11 @@ Contents:
 2. What is a socket? | 2-socket/
 	Types of sockets
 	Low level details, network theory
+3. IP Addresses, structs, and Data Munging | 3-ip_addresses-structs-data_munging/
+	3.1 IP Addresses v4, v6
+		3.1.1 Subnets
+		3.1.2 Port Numbers
+	3.2 Byte Order
+	3.3 structs
+	3.4 IP Addresses
+		3.4.1 Private Networks

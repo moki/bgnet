@@ -1,0 +1,190 @@
+3 IP Addresses, structs, and Data Munging
+
+3.1 IP Addresses v4, v6
+
+The internet protocol version 4 - IPv4
+
+addresses made up of four bytes(4 octets) separated by dots: 192.0.2.111
+allows up to 2^32 unique addresses ~4bil
+
+The internet protocol version 6 - IPv6
+
+addresses made up of eight 2 bytes(16-bit) chunks in hex separated by colons:
+2001:0db8:c9d2:aee5:73e3:934a:a5ae:9551
+sequential 0's can be compressed between two colons, one can leave off leading
+zeroes for each byte pair as an example:
+
+explicit: 2001:0db8:c9d2:0012:0000:0000:0000:0051
+implicit: 2001:db8:c9d2:12::51
+
+explicit: 2001:0db8:ab00:0000:0000:0000:0000:0000
+implicit: 2001:db8:ab00::
+
+explicit: 0000:0000:0000:0000:0000:0000:0000:0001
+implicit: ::1
+
+loopback address: ::1 known as localhost and represented in ipv4 as 127.0.0.1
+
+ipv4 compatible mode for ipv6
+::ffff:192.0.2.33
+
+3.1.1 Subnets
+
+Network portion of the ip address is called the netmask, which you bitwise and
+with the ip address to get the network number out of it.
+
+mask: 		255.255.255.0
+ip address: 	192.0.2.12
+network:	192.0.2.0
+host:		12
+
+representation convention:
+<ip_address>/<number_of_network_bits_in_decimal>
+ipv4
+192.0.2.12/30
+ipv6
+2001:db8::/32
+2001:db8:5413:4028::9db9/64
+
+3.1.2 Port Numbers
+
+16-bit number, that acts like address of the service.
+port numbers < 1024 are considered special and requires special OS privileges.
+listed in Big IANA Port List, on a unix: /etc/services
+
+
+3.2 Byte Order
+
+There are two orders in the computer architecture big-endian and little-endian
+little-endian:  intel 8086		hex-value: 4fb3
+big-endian:	network byte order	hex-value: b34f
+
+Host byte order mostly little-endian, Network byte order always big-endian.
+Convert values to network byte order before sending them on the wire, and
+convert them from network byte order to host byte order when they come off
+the wire.
+
+<arpa/inet.h>
+
+htons() - host to network short
+htonl() - host to network long
+ntohs() - network to host short
+ntohl() - network to host long
+
+3.3 structs
+
+socket descriptor type is int.
+
+socket address structure:
+
+struct addrinfo {
+	int		 ai_flags;	// AI_PASSIVE, AI_CANONNAME, etc.
+	int		 ai_family;	// AF_INET, AF_INET6, AF_UNSPEC
+	int		 ai_socktype;	// SOCK_STREAM, SOCK_DGRAM
+	int		 ai_protocol;	// use 0 for "any"
+	size_t		 ai_addrlen;	// size of ai_addr in bytes
+	struct sockaddr *ai_addr;	// struct sockaddr_in or _in6
+	char		*ai_canonname;	// full canonical hostname
+	struct addrinfo *ai_next;	// linked list, next node
+};
+
+rarely set by hand, rather by using getaddrinfo().
+
+AF_INET - ipv4, AF_INET6 - ipv6, AF_UNSPEC - use whatever(ip ver. agnostic)
+ai_next - points to the next element
+
+structure sockaddr:
+
+struct sockaddr {
+	unsigned short sa_family;	// address family, AF_xxx
+	char	       sa_data[14];	// 14 bytes of protocol address
+};
+
+sa_family - can be AF_INET(ipv4), AF_INET6(ipv6) as an example
+sa_data - destination address and port number for the socket.
+
+structure sockaddr_in("in" for internet) to be used with ipv4:
+
+struct sockaddr_in {
+	short int	   sin_family;	// Address family, AF_INET
+	unsigned short int sin_port;	// Port number, must be Network byte order
+	struct in_addr	   sin_addr;	// Internet address
+	unsigned char	   sin_zero[8];	// Same size as struct sockaddr
+};
+
+can be cast to a pointer to a struct sockaddr and vice-versa.
+sin_zero - padding to the length of the struct sockaddr,
+should be zeroed with memset()
+
+structure in_addr:
+
+struct in_addr {
+	uint32_t s_addr; // that's a 32-bit int (4-bytes), network byte order
+};
+
+contains 4-byte  IP address in network byte order
+
+structure sockaddr_in6 to be used with ipv6:
+
+struct sockaddr_in6 {
+	u_int16_t 	sin6_family;	// address family, AF_INET6
+	u_int16_t	sin6_port;	// port number, Network byte order
+	u_int32_t 	sin6_flowinfo;	// ipv6 flow information
+	struct in6_addr sin6_addr;	// ipv6 address
+	u_int32_t	sin6_scope_id;	// scope ID
+};
+
+structure in6_addr:
+
+struct in6_addr {
+	unsigned char s6_addr[16]; // ipv6 address
+};
+
+structure designed to hold both ipv4 and ipv6 structures:
+
+struct sockaddr_storage {
+	sa_family_t ss_family;			// address family
+	char	    __ss_pad1[_SS_PAD1SIZE];	// padding
+	int64_t	    __ss_align;
+	char	    __ss_pad2[_SS_PAD2SIZE];
+};
+
+ss_family can be used to judge if it's AF_INET or AF_INET6, and then
+you can cast it to a struct sockaddr_in or struct sockaddr_in6.
+
+3.4 IP Addresses - manipulating ip addresses
+
+set ip address in its presentation format to binary
+by stuffing it into sockaddr_in(6):
+
+struct sockaddr_in  sa;	 // ipv4
+struct sockaddr_in6 sa6; // ipv6
+
+inet_pton(AF_INET, "10.12.110.57", &(sa.sin_addr));		// ipv4
+inet_pton(AF_INET, "2001:db8:63b3:1::3490", &(sa6.sin6_addr));	// ipv6
+
+inet_pton return values:
+-1 on error,
+0 if the address is messed up.
+
+to convert from binary representaion to presentation:
+
+for ipv4:
+char ip4[INET_ADDRSTRLEN]; // space to hold the ipv4 string
+struct sockaddr_in sa;	   // socket address
+
+inet_ntop(AF_INET, &(sa.sin_addr), ip4, INET_ADDRSTRLEN);
+printf("the ipv4 address is: %s\n", ip4);
+
+for ipv6:
+char ip6[INET6_ADDRSTRLEN]; // space to hold the ipv6 string
+struct sockaddr_in6 sa6;    // socket address
+
+inet_ntop(AF_INET6, &(sa6.sin6_addr), ip6, INET6_ADDRSTRLEN);
+printf("the address is: %s\n", ip6);
+
+3.4.1 Private Networks
+
+NAT firewall does translation between public and private addresses.
+local computer might have one address(local), but if it connects to a server
+it tells you connected from another public one.
