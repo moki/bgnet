@@ -14,3 +14,5 @@ Contents:
 	3.3 structs
 	3.4 IP Addresses
 		3.4.1 Private Networks
+5. System Calls or Bust
+	5.1 getaddrinfo()

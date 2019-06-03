@@ -1,0 +1,26 @@
+5. System Calls
+System calls or library calls that allow you to acess the network functionality
+
+5.1 - getaddrinfo() - helps setup socket structs
+
+BEFORE one used gethostbyname() to do DNS lookup, then load that info into
+struct sockaddr_in by hand, and use that in your calls.
+NOW getaddrinfo() does DNS and service name lookups.
+
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netdb.h>
+
+int getaddrinfo(const char *node,		// "example.com" or ip
+		const char *service,		// "http" or port number
+		const struct addrinfo *hints,
+		struct addrinfo **res);
+
+three input parameters:
+node - host name to connect to or an ip address
+service - port number "80" or name "http"/"ftp"(found in /etc/services)
+hints - points to a struct addrinfo filled with already relevant information
+returns a pointer to a linked-list res of results.
+
+/server-tcp - sample code for tcp server setup
+/client-tcp - sample code for tcp client setup
