@@ -1,7 +1,7 @@
 5. System Calls
 System calls or library calls that allow you to acess the network functionality
 
-5.1 - getaddrinfo() - helps setup socket structs
+5.1 getaddrinfo() - helps setup socket structs
 
 BEFORE one used gethostbyname() to do DNS lookup, then load that info into
 struct sockaddr_in by hand, and use that in your calls.
@@ -24,3 +24,27 @@ returns a pointer to a linked-list res of results.
 
 /server-tcp - sample code for tcp server setup
 /client-tcp - sample code for tcp client setup
+
+5.2 socket() - get file descriptor
+
+#include <sys/types.h>
+#include <sys/socket.h>
+
+int socket(int domain, int type, int protocol);
+
+domain	 - PF_INET | PF_INET6
+type	 - SOCK_STREAM | SOCK_DGRAM
+protocol - 0 to choose proper protocol for a given type, or call
+	   getprotobyname() to look up the protocol you want tcp or udp.
+
+PF_INET(ProtocolFamily) and AF_INET(AddressFamily) might seen
+to be used interchangebly but that's not correct way to do things.
+PF_INET used for socket call, and AF_INET when initializing struct sockaddr_in
+feed values from getaddrinfo() into socket()
+
+int s;
+struct addrinfo hints;
+struct addrinfo *response;
+
+getaddrinfo("google.com", "http", &hints, &response);
+s = socket(response->ai_family, response->ai_socktype, response->ai_protocol);
