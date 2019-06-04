@@ -17,3 +17,5 @@ Contents:
 5. System Calls or Bust
 	5.1 getaddrinfo()
 	5.2 socket()
+	5.3 bind()
+	5.4 connect()
