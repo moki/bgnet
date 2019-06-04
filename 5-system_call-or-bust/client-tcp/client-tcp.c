@@ -49,6 +49,20 @@ void connect_tcp(void) {
 		inet_ntop(cursor->ai_family, addr, ipstr, sizeof(ipstr));
 		printf("%s:%s\n", ipver, ipstr);
 	}
+	int err;
+	int sockfd = socket(servinfo->ai_family,
+			    servinfo->ai_socktype,
+			    servinfo->ai_protocol);
+	if (sockfd == -1) {
+		fprintf(stderr, "failed socket()\n");
+		exit(1);
+	}
+
+	err = connect(sockfd, servinfo->ai_addr, servinfo->ai_addrlen);
+	if (err == -1) {
+		fprintf(stderr, "failed connect()\n");
+		exit(1);
+	}
 
 	freeaddrinfo(servinfo);
 }
