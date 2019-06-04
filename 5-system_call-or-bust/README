@@ -48,3 +48,42 @@ struct addrinfo *response;
 
 getaddrinfo("google.com", "http", &hints, &response);
 s = socket(response->ai_family, response->ai_socktype, response->ai_protocol);
+
+5.3 bind() associate socket with a port on the machine
+
+#include <sys/types.h>
+#include <sys/socket.h>
+
+int bind(int sockfd, struct sockaddr *my_addr, int addrlen);
+
+sockfd  - fd returned by socket()
+my_addr - pointer to a struct sockaddr
+addrlen - length in bytes of that address
+
+struct addrinfo hints, *response;
+int sockfd;
+
+memset(&hints, 0, sizeof(hints));
+hints.ai_family = AF_UNSPEC;	 // ipv4 or ipv6
+hints.ai_socktype = SOCK_STREAM; // tcp
+hints.ai_flags = AI_PASSIVE;	 // fill with localhost
+
+getaddrinfo(NULL, "3490", &hints, &response);
+
+/* get socket fd */
+sockfd = socket(response->ai_family, response->ai_socktype, response->ai_protocol);
+
+/* bind it to the port we passed in to getaddrinfo() */
+bind(sockfd, response->ai_addr, response->ai_addrlen);
+
+reusing port:
+
+int yes = 1;
+if (setsockopt(listener, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes)) == -1) {
+	perror("setsockopt");
+	exit(1);
+}
+
+if connecting to a remote machine and local port used not important,
+one can skip bind to connect(), it'll check to see if socket is unbound
+and will bind() it to an unused local port if necessary.
