@@ -19,3 +19,4 @@ Contents:
 	5.2 socket()
 	5.3 bind()
 	5.4 connect()
+	5.5 listen()

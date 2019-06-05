@@ -29,5 +29,12 @@ void listen_tcp(void) {
 	printf("server code is ok\n");
 	/* servinfo now points to a linked list of 1 or more struct addrinfos */
 
+	int sockfd = socket(servinfo->ai_family,
+			    servinfo->ai_socktype,
+			    servinfo->ai_protocol);
+
+	bind(sockfd, servinfo->ai_addr, servinfo->ai_addrlen);
+	listen(sockfd, 20);
+
 	freeaddrinfo(servinfo);
 }

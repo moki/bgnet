@@ -98,3 +98,14 @@ int connect(int sockfd, struct sockaddr *serv_addr, int addrlen);
 sockfd 	  - socket file descriptor
 serv_addr - struct containing the dest. port and ip address
 addrlen   - length in bytes of the server address structure
+
+5.5 listen() - listen for the connection
+
+to listen for a connection first you listen() then you accept()
+
+int listen(int sockfd, int backlog);
+
+sockfd  - socket file descriptor
+backlog - number of the connections allowed on the incoming queue
+	incoming connections wait on the queue untill you accept() them
+	most systems limit this number to about 20
