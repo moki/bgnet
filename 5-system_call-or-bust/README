@@ -126,3 +126,24 @@ int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen);
 sockfd  - is the listen()ing socket descriptor.
 addr    - pointer to sockaddr structure info about the inc. connection
 addrlen - size in bytes of the sockaddr
+
+5.7 send() and recv() - communication over stream sockets
+
+#include <sys/socket.h>
+
+ssize_t send(int sockfd, const void *msg, size_t len, int flags);
+
+sockfd - socket descriptor you want to send data to
+msg    - pointer to the data you sending
+len    - length in bytes of the data
+flags  - zero or more ORed flags
+
+ssize_t recv(int socket, void *buffer, size_t length, int flags);
+
+socket - socket descriptor you want to receive data from
+buffer - buffer to read data into
+length - maximum length of the buffer
+flags  - zero or more ORed flags
+
+recv returns number of received bytes, can return zero that means the remote
+side has closed the connection on you

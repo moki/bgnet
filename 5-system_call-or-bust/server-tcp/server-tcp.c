@@ -41,5 +41,15 @@ void listen_tcp(void) {
 	addr_size = sizeof(their_addr);
 	int newfd = accept(sockfd, (struct sockaddr *) &their_addr, &addr_size);
 
+	char *msg = "Hi from moki's server";
+	size_t msg_len = strlen(msg);
+	ssize_t bytes_sent = send(newfd, msg, msg_len, 0);
+	if (bytes_sent < 0) {
+		fprintf(stderr, "failed to send msg to client\n");
+		exit(1);
+	}
+
+	printf("sent back msg :)\n");
+
 	freeaddrinfo(servinfo);
 }
