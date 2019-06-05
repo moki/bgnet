@@ -109,3 +109,20 @@ sockfd  - socket file descriptor
 backlog - number of the connections allowed on the incoming queue
 	incoming connections wait on the queue untill you accept() them
 	most systems limit this number to about 20
+
+5.6 accept() - get the pending connection of the connection queue
+
+Someone trying to connect() to the machine on a port machine listen()s
+connection queued up waiting to be accept()ed. accept() call gets the pending
+connection, it returns brand new socket fd to use for this single connection.
+The original socket still listening for more new connections, and the newly
+created one is ready to send() and recv()
+
+#include <sys/types.h>
+#include <sys/socket.h>
+
+int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen);
+
+sockfd  - is the listen()ing socket descriptor.
+addr    - pointer to sockaddr structure info about the inc. connection
+addrlen - size in bytes of the sockaddr

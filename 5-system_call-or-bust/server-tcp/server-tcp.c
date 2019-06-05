@@ -2,6 +2,7 @@
 #define _XOPEN_SOURCE (1)
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <netinet/in.h>
 #include <netdb.h>
 #include <string.h>
 #include <stdlib.h>
@@ -12,6 +13,8 @@ void listen_tcp(void) {
 	int status;
 	struct addrinfo hints;
 	struct addrinfo *servinfo;
+	struct sockaddr_storage their_addr;
+	socklen_t addr_size;
 
 	memset(&hints, 0, sizeof(hints));
 	hints.ai_family = AF_UNSPEC;
@@ -35,6 +38,8 @@ void listen_tcp(void) {
 
 	bind(sockfd, servinfo->ai_addr, servinfo->ai_addrlen);
 	listen(sockfd, 20);
+	addr_size = sizeof(their_addr);
+	int newfd = accept(sockfd, (struct sockaddr *) &their_addr, &addr_size);
 
 	freeaddrinfo(servinfo);
 }
