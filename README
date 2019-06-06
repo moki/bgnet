@@ -14,3 +14,15 @@ Contents:
 	3.3 structs
 	3.4 IP Addresses
 		3.4.1 Private Networks
+5. System Calls or Bust
+	5.1 getaddrinfo()
+	5.2 socket()
+	5.3 bind()
+	5.4 connect()
+	5.5 listen()
+	5.6 accept()
+	5.7 send(), recv()
+	5.8 sendto(), recvfrom()
+	5.9 close(), shutdown()
+	5.10 getpeername()
+	5.11 gethostname()

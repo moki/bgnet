@@ -1,0 +1,220 @@
+5. System Calls
+System calls or library calls that allow you to acess the network functionality
+
+5.1 getaddrinfo() - helps setup socket structs
+
+BEFORE one used gethostbyname() to do DNS lookup, then load that info into
+struct sockaddr_in by hand, and use that in your calls.
+NOW getaddrinfo() does DNS and service name lookups.
+
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netdb.h>
+
+int getaddrinfo(const char *node,		// "example.com" or ip
+		const char *service,		// "http" or port number
+		const struct addrinfo *hints,
+		struct addrinfo **res);
+
+three input parameters:
+node - host name to connect to or an ip address
+service - port number "80" or name "http"/"ftp"(found in /etc/services)
+hints - points to a struct addrinfo filled with already relevant information
+returns a pointer to a linked-list res of results.
+
+/server-tcp - sample code for tcp server setup
+/client-tcp - sample code for tcp client setup
+
+5.2 socket() - get file descriptor
+
+#include <sys/types.h>
+#include <sys/socket.h>
+
+int socket(int domain, int type, int protocol);
+
+domain	 - PF_INET | PF_INET6
+type	 - SOCK_STREAM | SOCK_DGRAM
+protocol - 0 to choose proper protocol for a given type, or call
+	   getprotobyname() to look up the protocol you want tcp or udp.
+
+PF_INET(ProtocolFamily) and AF_INET(AddressFamily) might seen
+to be used interchangebly but that's not correct way to do things.
+PF_INET used for socket call, and AF_INET when initializing struct sockaddr_in
+feed values from getaddrinfo() into socket()
+
+int s;
+struct addrinfo hints;
+struct addrinfo *response;
+
+getaddrinfo("google.com", "http", &hints, &response);
+s = socket(response->ai_family, response->ai_socktype, response->ai_protocol);
+
+5.3 bind() associate socket with a port on the machine
+
+#include <sys/types.h>
+#include <sys/socket.h>
+
+int bind(int sockfd, struct sockaddr *my_addr, int addrlen);
+
+sockfd  - fd returned by socket()
+my_addr - pointer to a struct sockaddr
+addrlen - length in bytes of that address
+
+struct addrinfo hints, *response;
+int sockfd;
+
+memset(&hints, 0, sizeof(hints));
+hints.ai_family = AF_UNSPEC;	 // ipv4 or ipv6
+hints.ai_socktype = SOCK_STREAM; // tcp
+hints.ai_flags = AI_PASSIVE;	 // fill with localhost
+
+getaddrinfo(NULL, "3490", &hints, &response);
+
+/* get socket fd */
+sockfd = socket(response->ai_family, response->ai_socktype, response->ai_protocol);
+
+/* bind it to the port we passed in to getaddrinfo() */
+bind(sockfd, response->ai_addr, response->ai_addrlen);
+
+reusing port:
+
+int yes = 1;
+if (setsockopt(listener, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes)) == -1) {
+	perror("setsockopt");
+	exit(1);
+}
+
+if connecting to a remote machine and local port used not important,
+one can skip bind to connect(), it'll check to see if socket is unbound
+and will bind() it to an unused local port if necessary.
+
+5.4 connect() - connect to a remote host
+
+#include <sys/types.h>
+#include <sys/socket.h>
+
+int connect(int sockfd, struct sockaddr *serv_addr, int addrlen);
+
+sockfd 	  - socket file descriptor
+serv_addr - struct containing the dest. port and ip address
+addrlen   - length in bytes of the server address structure
+
+5.5 listen() - listen for the connection
+
+to listen for a connection first you listen() then you accept()
+
+int listen(int sockfd, int backlog);
+
+sockfd  - socket file descriptor
+backlog - number of the connections allowed on the incoming queue
+	incoming connections wait on the queue untill you accept() them
+	most systems limit this number to about 20
+
+5.6 accept() - get the pending connection of the connection queue
+
+Someone trying to connect() to the machine on a port machine listen()s
+connection queued up waiting to be accept()ed. accept() call gets the pending
+connection, it returns brand new socket fd to use for this single connection.
+The original socket still listening for more new connections, and the newly
+created one is ready to send() and recv()
+
+#include <sys/types.h>
+#include <sys/socket.h>
+
+int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen);
+
+sockfd  - is the listen()ing socket descriptor.
+addr    - pointer to sockaddr structure info about the inc. connection
+addrlen - size in bytes of the sockaddr
+
+5.7 send() and recv() - communication over stream sockets
+
+#include <sys/socket.h>
+
+ssize_t send(int sockfd, const void *msg, size_t len, int flags);
+
+sockfd - socket descriptor you want to send data to
+msg    - pointer to the data you sending
+len    - length in bytes of the data
+flags  - zero or more ORed flags
+
+ssize_t recv(int socket, void *buffer, size_t length, int flags);
+
+socket - socket descriptor you want to receive data from
+buffer - buffer to read data into
+length - maximum length of the buffer
+flags  - zero or more ORed flags
+
+recv returns number of received bytes, can return zero that means the remote
+side has closed the connection on you
+
+5.9 sendto(), recvfrom() - communication over datagram sockets
+
+ssize_t sendto(int socket, const void *msg, size_t length, int flags,
+	       const struct sockaddr *dest_addr, socklen_t dest_len);
+
+socket	  - socket descriptor you want to send data to
+msg	  - pointer to the data you sending
+length	  - length in bytes of the data
+int	  - zero or more ORed flags
+dest_addr - pointer to a sockaddr struct containing the dest. address.
+dest_len  - length of the dest_addr
+
+returns the number of bytes actually sent
+
+ssize_t recvfrom(int socket, void *buffer, size_t length, int flags,
+		 struct sockaddr *address, socklen_t address_len);
+
+socket	    - socket descriptor you want to receive data from
+buffer	    - buffer to store received data
+length	    - lenght of the buffer in bytes
+address	    - struct sockaddr containing ip address and port of the sender machine
+address_len - length of the address
+
+returns the number of bytes received
+
+5.9 close(), shutdown() - close connection
+
+prevent any following reads and writes to a socket:
+close(socket);
+attempt to read or write will result in receiving the error.
+shutdown() allows to cut off communication in a certain direction:
+
+int shutdown(int socket, int how);
+
+socket - socket file descriptor
+how    - type of shutdown:
+	 SHUT_RD - disable further receives,
+	 SHUT_WR - disable further send,
+	 SHUT_RDWR - disable further receive and send
+
+returns 0 on success, -1 on error
+
+shutdown doesnt close fd, just changes usability
+
+5.10 getpeername()
+
+tells you who is at the other end of a connected stream socket
+
+#include <sys/socket.h>
+int getpeername(int socket, struct sockaddr *addr, socklen_t *addrlen);
+
+socket  - socket fd
+addr    - struct sockaddr *buffer
+addrlen - sizeof buffer addr
+
+writes address of the peer to addr buffer and size of the name returned
+in bytes in addrlen.
+
+return address can be used with inet_ntop(), getnameinfo(), gethostbyaddr()
+
+5.11 gethostname() - name of the machine code runs on
+
+#include <unistd.h>
+
+int gethostname(char *hostname, size_t size);
+
+hostname - buffer where name of the host machine will be written
+size	 - length in bytes
+
+returns name of the computer that your program is running on.
