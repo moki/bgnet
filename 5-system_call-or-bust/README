@@ -207,3 +207,14 @@ writes address of the peer to addr buffer and size of the name returned
 in bytes in addrlen.
 
 return address can be used with inet_ntop(), getnameinfo(), gethostbyaddr()
+
+5.11 gethostname() - name of the machine code runs on
+
+#include <unistd.h>
+
+int gethostname(char *hostname, size_t size);
+
+hostname - buffer where name of the host machine will be written
+size	 - length in bytes
+
+returns name of the computer that your program is running on.
