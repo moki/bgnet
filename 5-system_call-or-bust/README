@@ -147,3 +147,28 @@ flags  - zero or more ORed flags
 
 recv returns number of received bytes, can return zero that means the remote
 side has closed the connection on you
+
+5.9 sendto(), recvfrom() - communication over datagram sockets
+
+ssize_t sendto(int socket, const void *msg, size_t length, int flags,
+	       const struct sockaddr *dest_addr, socklen_t dest_len);
+
+socket	  - socket descriptor you want to send data to
+msg	  - pointer to the data you sending
+length	  - length in bytes of the data
+int	  - zero or more ORed flags
+dest_addr - pointer to a sockaddr struct containing the dest. address.
+dest_len  - length of the dest_addr
+
+returns the number of bytes actually sent
+
+ssize_t recvfrom(int socket, void *buffer, size_t length, int flags,
+		 struct sockaddr *address, socklen_t address_len);
+
+socket	    - socket descriptor you want to receive data from
+buffer	    - buffer to store received data
+length	    - lenght of the buffer in bytes
+address	    - struct sockaddr containing ip address and port of the sender machine
+address_len - length of the address
+
+returns the number of bytes received
