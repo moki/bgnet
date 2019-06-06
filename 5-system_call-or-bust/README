@@ -172,3 +172,22 @@ address	    - struct sockaddr containing ip address and port of the sender machi
 address_len - length of the address
 
 returns the number of bytes received
+
+5.9 close(), shutdown() - close connection
+
+prevent any following reads and writes to a socket:
+close(socket);
+attempt to read or write will result in receiving the error.
+shutdown() allows to cut off communication in a certain direction:
+
+int shutdown(int socket, int how);
+
+socket - socket file descriptor
+how    - type of shutdown:
+	 SHUT_RD - disable further receives,
+	 SHUT_WR - disable further send,
+	 SHUT_RDWR - disable further receive and send
+
+returns 0 on success, -1 on error
+
+shutdown doesnt close fd, just changes usability
