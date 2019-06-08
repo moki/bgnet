@@ -1,0 +1,7 @@
+6. Client-Server Background
+
+	request
+send() 		 recv()
+client	network  server
+recv()		 send()
+	response

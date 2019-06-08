@@ -26,3 +26,5 @@ Contents:
 	5.9 close(), shutdown()
 	5.10 getpeername()
 	5.11 gethostname()
+6. Client-Server Background
+	6.1 TCP(Stream) Server
