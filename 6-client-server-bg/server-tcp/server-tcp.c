@@ -108,6 +108,7 @@ void server_listen_tcp(void) {
 
 		if (!fork()) {
 			close(sock);
+			fprintf(stdout, "server:sending:\n%s\n", ok_msg);
 			if (send(_sock, ok_msg, 8, 0) == -1) {
 				perror("server:send");
 			}
