@@ -4,7 +4,7 @@ OPTIND=1
 
 DIRS[0]="5-system_call-or-bust"
 DIRS[1]="6-client-server-bg/server-tcp"
-DIR_IDX=0
+DIRS[2]="6-client-server-bg/client-tcp"
 
 ROOT_DIR="$(pwd)"
 OPT_CLEAN="clean"
