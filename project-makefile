@@ -1,5 +1,5 @@
 TARGET = main.out
-SRCS = $(wildcard ./*.c) $(wildcard ./*/*.c) $(wildcard ./*/*/*.c)
+SRCS = $(wildcard ./*.c) $(wildcard ./*/*.c)
 OBJS = $(SRCS: ./*/*.c=*.o)
 
 CC = gcc
@@ -25,7 +25,7 @@ POSTCOMPILE = @mv -f $(DEPDIR)/$*.Td $(DEPDIR)/$*.d && touch $@
 	$(POSTCOMPILE)
 
 clean:
-	-rm -f ./*.o ./*/*.o ./*/*/*.o
+	-rm -f ./*.o ./*/*.o
 	-rm -f ./*.out
 
 $(DEPDIR)/%.d: ;
